@@ -74,19 +74,17 @@ public class ElevatorBehaviour: MonoBehaviour
         {
             _aimFloor = GetNextAim();
 
-            Debug.Log(_aimFloor);
-
-            float _lastFloor = CurrentFloor;
+           
             yield return StartCoroutine(MoveElevator(_aimFloor));
 
             FloorState state = _floorStates[CurrentFloor];
 
             state.ChoosedInElevator = false;
-            if (CurrentFloor<_lastFloor)
+            if (_elevatorState == ElevatorState.MovingDown)
             {
                 state.DownPressed = false;
             }
-            else
+            if (_elevatorState == ElevatorState.MovingUp)
             {
                 state.UpPresed = false;
             }
@@ -127,7 +125,7 @@ public class ElevatorBehaviour: MonoBehaviour
 
         if (_elevatorState == ElevatorState.MovingDown || _elevatorState == ElevatorState.Staying)
         {
-            IEnumerable<int> downFloors = _floorStates.Keys.Where(f =>( _floorStates[f].ChoosedInElevator || _floorStates[f].DownPressed) && f <= CurrentFloor);
+            IEnumerable<int> downFloors = _floorStates.Keys.Where(f =>( _floorStates[f].ChoosedInElevator || _floorStates[f].DownPressed) && f >= CurrentFloor);
             if (downFloors.Count() != 0)
             {
                 if (_elevatorState == ElevatorState.Staying)

@@ -14,6 +14,49 @@ public class FloorPanel : MonoBehaviour
     public Text FloorNumber;
     public Button UpButton;
     public Button DownButton;
+    public GameObject HumanPrefab;
+    public Transform WaitingArea;
+
+    private bool __downPressed;
+    private bool _downPressed
+    {
+        get
+        {
+            return __downPressed;
+        }
+        set
+        {
+            __downPressed = value;
+            if (__downPressed)
+            {
+                _downButtonImage.color = Color.green;
+            }
+            else
+            {
+                _downButtonImage.color = Color.white;
+            }
+        }
+    }
+    private bool __upPressed;
+    private bool _upPressed
+    {
+        get
+        {
+            return __upPressed;
+        }
+        set
+        {
+            __upPressed = value;
+            if (__upPressed)
+            {
+                _upButtonImage.color = Color.green;
+            }
+            else
+            {
+                _upButtonImage.color = Color.white;
+            }
+        }
+    }
 
     private Image __upButtonImage;
     private Image _upButtonImage
@@ -55,42 +98,46 @@ public class FloorPanel : MonoBehaviour
         FloorNumber.text = (number+1).ToString();
         UpButton.onClick.AddListener(() =>
         {
-            onFloorPanelClicked(number, Direction.Up);
-            GetButtonImageByDirection(Direction.Up).color = Color.green;
+            if (!_upPressed)
+            {
+                CreateHuman();
+                onFloorPanelClicked(number, Direction.Up);  
+                _upPressed = true;
+            }
         });
 
         DownButton.onClick.AddListener(() =>
         {
-            onFloorPanelClicked(number, Direction.Down);
-            GetButtonImageByDirection(Direction.Down).color = Color.green;
+            if (!_downPressed)
+            {
+                CreateHuman();
+                onFloorPanelClicked(number, Direction.Down);    
+                _downPressed = true;
+            }
         });
 
-        _downButtonImage.alphaHitTestMinimumThreshold = 0.1f;
-        _upButtonImage.alphaHitTestMinimumThreshold = 0.1f;
+        //_downButtonImage.alphaHitTestMinimumThreshold = 0.1f;
+        //_upButtonImage.alphaHitTestMinimumThreshold = 0.1f;
     }
 
+    public void CreateHuman()
+    {
+        if (WaitingArea.transform.childCount < 2)
+        {
+            GameObject newHuman = Instantiate(HumanPrefab, Vector3.zero, Quaternion.identity, WaitingArea);
+        }
+    }
 
     public void ResetButton(Direction direction)
     {
-        GetButtonImageByDirection(direction).color = Color.white;
-    }
-
-    public void ResetDirections()
-    {
-        ResetButton(Direction.Up);
-        ResetButton(Direction.Down);
-    }
-
-    private Image GetButtonImageByDirection(Direction direction)
-    {
         switch (direction)
         {
+            case Direction.Down:       
+                _downPressed = false;
+                break;
             case Direction.Up:
-                return _upButtonImage;
-            case Direction.Down:
-                return _downButtonImage;
-        }
-
-        return null;
+                _upPressed = false;
+                break;
+        }   
     }
 }

@@ -1,18 +1,16 @@
 ﻿using System;
 using UnityEngine;
 
-public class Elevator : MonoBehaviour {
-
-    public FloorsView FloorsView;
+public class Elevator : MonoBehaviour
+{
     public ElevatorView View;
     public ElevatorBehaviour Behaviour;
     public ElevatorShaftView Shaft;
 
 	public void Launch (int floors)
     {
-        FloorsView.GenerateFloorButtons(floors, FloorButtonClicked);
         View.GenerateElevatorButtons(floors, ElevatorButtonClicked);
-        Shaft.Init(floors);
+        Shaft.Init(floors, FloorButtonClicked);
         Behaviour.OnPositonChanged += Shaft.ChangePosition;
         Behaviour.OnPositonChanged += View.SetFloor;
         Behaviour.OnStateChanged += FloorStateChanged;
@@ -23,11 +21,11 @@ public class Elevator : MonoBehaviour {
     {
         if (!state.DownPressed)
         {
-            FloorsView.ResetButton(floor, FloorPanel.Direction.Down);
+            Shaft.ResetButton(floor, FloorPanel.Direction.Down);
         }
         if (!state.UpPresed)
         {
-            FloorsView.ResetButton(floor, FloorPanel.Direction.Up);
+            Shaft.ResetButton(floor, FloorPanel.Direction.Up);
         }
 
         if (!state.ChoosedInElevator)

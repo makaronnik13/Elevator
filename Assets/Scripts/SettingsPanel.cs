@@ -20,7 +20,7 @@ public class SettingsPanel : MonoBehaviour
     private void OnInputChanged(string text)
     {
         int r;
-        StartButton.interactable = int.TryParse(text, out r);
+        StartButton.interactable = int.TryParse(text, out r) && r>0;
     }
 
     public void StartGame()
