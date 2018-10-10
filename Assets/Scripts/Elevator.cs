@@ -3,22 +3,20 @@ using UnityEngine;
 
 public class Elevator : MonoBehaviour {
 
-    public int Floors;
     public FloorsView FloorsView;
     public ElevatorView View;
     public ElevatorBehaviour Behaviour;
     public ElevatorShaftView Shaft;
 
-	// Use this for initialization
-	void Start ()
+	public void Launch (int floors)
     {
-        FloorsView.GenerateFloorButtons(Floors, FloorButtonClicked);
-        View.GenerateElevatorButtons(Floors, ElevatorButtonClicked);
-        Shaft.Init(Floors);
+        FloorsView.GenerateFloorButtons(floors, FloorButtonClicked);
+        View.GenerateElevatorButtons(floors, ElevatorButtonClicked);
+        Shaft.Init(floors);
         Behaviour.OnPositonChanged += Shaft.ChangePosition;
         Behaviour.OnPositonChanged += View.SetFloor;
         Behaviour.OnStateChanged += FloorStateChanged;
-        Behaviour.Launch(Floors);
+        Behaviour.Launch(floors);
 	}
 
     private void FloorStateChanged(int floor, FloorState state)

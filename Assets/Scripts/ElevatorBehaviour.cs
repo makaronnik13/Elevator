@@ -2,16 +2,25 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class ElevatorBehaviour: MonoBehaviour
 {
+    private enum ElevatorState
+    {
+        MovingUp,
+        MovingDown,
+        Staying,
+        Stoped,
+        Loading
+    }
+
+    private ElevatorState _elevatorState = ElevatorState.Staying;
+
     public float Speed = 1f;
     public float LoadingTime = 2f;
-
     private Dictionary<int, FloorState> _floorStates = new Dictionary<int, FloorState>();
-    private bool _loading;
-    private bool _stoped;
     private int _aimFloor;
     private float __currentPosition;
     private float _currentPosition
@@ -64,6 +73,9 @@ public class ElevatorBehaviour: MonoBehaviour
         while (true)
         {
             _aimFloor = GetNextAim();
+
+            Debug.Log(_aimFloor);
+
             float _lastFloor = CurrentFloor;
             yield return StartCoroutine(MoveElevator(_aimFloor));
 
@@ -89,7 +101,7 @@ public class ElevatorBehaviour: MonoBehaviour
         float t = Mathf.Abs(_currentPosition - aim);
         float pathTime = t;
         float from = _currentPosition;
-        while (!_stoped && !Mathf.Approximately(_currentPosition, aim))
+        while (_elevatorState!= ElevatorState.Staying && _elevatorState!= ElevatorState.Stoped && _elevatorState!= ElevatorState.Loading && !Mathf.Approximately(_currentPosition, aim))
         {
             _currentPosition = Mathf.Lerp(aim, from, t/pathTime);
             t -= Time.deltaTime*Speed;
@@ -99,8 +111,34 @@ public class ElevatorBehaviour: MonoBehaviour
 
     private int GetNextAim()
     {
-        int v = UnityEngine.Random.Range(0, _floors);
-        return v;
+        if (_elevatorState == ElevatorState.MovingUp || _elevatorState == ElevatorState.Staying)
+        {
+            IEnumerable<int> upperFloors = _floorStates.Keys.Where(f => (_floorStates[f].ChoosedInElevator  || _floorStates[f].UpPresed) && f>=CurrentFloor);
+
+            if (upperFloors.Count() != 0)
+            {
+                if (_elevatorState == ElevatorState.Staying)
+                {
+                    _elevatorState = ElevatorState.MovingUp;
+                }
+                return upperFloors.OrderBy(f => f).First();      
+            }
+        }
+
+        if (_elevatorState == ElevatorState.MovingDown || _elevatorState == ElevatorState.Staying)
+        {
+            IEnumerable<int> downFloors = _floorStates.Keys.Where(f =>( _floorStates[f].ChoosedInElevator || _floorStates[f].DownPressed) && f <= CurrentFloor);
+            if (downFloors.Count() != 0)
+            {
+                if (_elevatorState == ElevatorState.Staying)
+                {
+                    _elevatorState = ElevatorState.MovingDown;
+                }
+                return downFloors.OrderBy(f => f).Last();
+            }
+        }
+
+        return Mathf.Max(0, CurrentFloor-1);
     }
 
     public void SetState(int i, FloorState state)
