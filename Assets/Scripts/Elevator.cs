@@ -14,8 +14,15 @@ public class Elevator : MonoBehaviour
         Behaviour.OnPositonChanged += Shaft.ChangePosition;
         Behaviour.OnPositonChanged += View.SetFloor;
         Behaviour.OnStateChanged += FloorStateChanged;
+        Behaviour.OnPeoplesCountChanged += PeoplesCountChanged;
+        Behaviour.OnDoorsStateChanged += Shaft.SetCabinState;
         Behaviour.Launch(floors);
 	}
+
+    private void PeoplesCountChanged(int v)
+    {
+        View.LightUpButtons = v != 0;
+    }
 
     private void FloorStateChanged(int floor, FloorState state)
     {
@@ -32,9 +39,7 @@ public class Elevator : MonoBehaviour
         {
             View.ResetButton(floor);
         }
-
     }
-
     private void FloorButtonClicked(int floor, FloorPanel.Direction direction)
     {
         FloorState state = Behaviour.GetState(floor);
@@ -48,6 +53,12 @@ public class Elevator : MonoBehaviour
                 break;
         }
         Behaviour.SetState(floor, state);
+    }
+
+    public void PlaceHumanInside(Human human)
+    {
+        Behaviour.AddHuman();
+        Shaft.PlaceHumanInside(human.transform);
     }
 
     private void ElevatorButtonClicked(int floor)

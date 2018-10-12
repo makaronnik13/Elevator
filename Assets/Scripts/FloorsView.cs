@@ -6,6 +6,7 @@ public class FloorsView : MonoBehaviour
 {
     public GameObject FloorPanelPrefab;
     public Transform FloorPanelsContent;
+
     private List<FloorPanel> _panels = new List<FloorPanel>();
 
 	public void GenerateFloorButtons(int floors, Action<int, FloorPanel.Direction> onFloorPanelClicked)
@@ -17,7 +18,6 @@ public class FloorsView : MonoBehaviour
             _panels.Add(newPanel);
         }
     }
-
     public void ResetButton(int i, FloorPanel.Direction direction)
     {
         _panels[i].ResetButton(direction);

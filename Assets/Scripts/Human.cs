@@ -6,8 +6,10 @@ using UnityEngine.UI;
 
 public class Human : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
+    private bool _inCabin = false;
     public Sprite[] variants;
     private RectTransform _dragingFrom;
+    private bool _dragging = false;
 
     void Start()
     {
@@ -17,25 +19,41 @@ public class Human : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHan
 
     public void OnDrag(PointerEventData eventData)
     {
-        Vector3 resultPosition = _dragingFrom.InverseTransformPoint(eventData.position);
-
-        float minx = -_dragingFrom.rect.width / 2f - ((RectTransform)transform).rect.width * 1.5f;
-        float maxx = _dragingFrom.rect.width / 2f - ((RectTransform)transform).rect.width / 2f;
-        float xPosition = Mathf.Clamp(resultPosition.x, minx, maxx);
-
-        resultPosition = new Vector3(xPosition, 0, resultPosition.z);
-        
-        transform.position = _dragingFrom.TransformPoint(resultPosition);
+        if (!_dragging)
+        {
+            return;
+        }
+       
+        transform.position +=  new Vector3(eventData.delta.x, eventData.delta.y,0);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
+        if (!GetComponentInParent<Elevator>().Behaviour.DoorOpen)
+        {
+            return;
+        }
+        _dragging = true;
         _dragingFrom = (RectTransform)transform.parent;
         transform.SetParent(GetComponentInParent<Canvas>().transform);
     }
 
     public void OnEndDrag(PointerEventData eventData)
     {
-        transform.SetParent(_dragingFrom);
+        if (!_dragging)
+        {
+            return;
+        }
+        _dragging = false;
+        float localX = _dragingFrom.InverseTransformPoint(eventData.position).x;
+        if (localX<-((RectTransform)transform).rect.width/2f)
+        {
+            GetComponentInParent<Elevator>().PlaceHumanInside(this);
+            _inCabin = true;
+        }
+        else
+        {
+            transform.SetParent(_dragingFrom);
+        }       
     }
 }

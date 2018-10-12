@@ -5,9 +5,11 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-public class ElevatorShaftView : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
+public class ElevatorShaftView : MonoBehaviour
 {
     public RectTransform Cabin;
+    public GameObject ShaftPanelPrefab;
+    public RectTransform FloorsParent;
 
     private float __floorSize = 0;
     private float _floorSize
@@ -21,13 +23,8 @@ public class ElevatorShaftView : MonoBehaviour, IBeginDragHandler, IDragHandler,
             return __floorSize;
         }
     }
-    public GameObject ShaftPanelPrefab;
-    public RectTransform FloorsParent;
-
-    private bool moving = false;
     private List<FloorPanel> _panels = new List<FloorPanel>();
     private Vector2 _pointPosition;
-
 
     public void Init(int floors, Action<int, FloorPanel.Direction> onFloorPanelClicked)
     {
@@ -43,43 +40,22 @@ public class ElevatorShaftView : MonoBehaviour, IBeginDragHandler, IDragHandler,
         ChangePosition(0);
         FloorsParent.localPosition = Vector2.up*floors*_floorSize;
     }
-
     public void ChangePosition(float v)
     {        
         Cabin.anchoredPosition = new Vector2(Cabin.anchoredPosition.x, _floorSize*(v+0.5f));
-        /*
-        if (!moving)
-        {
-            Vector2 needPosition = new Vector2(transform.localPosition.x, Cabin.sizeDelta.y  - Screen.height / 2f - Cabin.anchoredPosition.y + GetComponent<RectTransform>().sizeDelta.y / 2f);
-            transform.localPosition = Vector3.Lerp(transform.localPosition, needPosition, Time.deltaTime * 3f);
-        }*/
     }
-
-    public void OnDrag(PointerEventData eventData)
-    {      
-        transform.localPosition += Vector3.up * Mathf.Clamp(eventData.delta.y, -GetComponent<RectTransform>().rect.height/2, GetComponent<RectTransform>().rect.height/2);
-    }
-
-    public void OnBeginDrag(PointerEventData eventData)
-    {
-        StopCoroutine(ShowCabin(2f));
-        moving = true;
-        _pointPosition = eventData.position;
-    }
-
-    public void OnEndDrag(PointerEventData eventData)
-    {
-        StartCoroutine(ShowCabin(2f));
-    }
-
-    private IEnumerator ShowCabin(float v)
-    {
-        yield return new WaitForSeconds(v);
-        moving = false;
-    }
-
     public void ResetButton(int i, FloorPanel.Direction direction)
     {
         _panels[i].ResetButton(direction);
+    }
+
+    public void PlaceHumanInside(Transform humanTransform)
+    {
+        humanTransform.transform.SetParent(Cabin);
+    }
+
+    public void SetCabinState(bool v)
+    {
+        Cabin.GetComponent<Animator>().SetBool("Open", v);
     }
 }

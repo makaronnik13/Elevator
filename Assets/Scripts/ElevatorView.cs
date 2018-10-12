@@ -9,7 +9,17 @@ public class ElevatorView : MonoBehaviour
     public Text FloorText;
     public Transform ButtonsContent;
     public GameObject ButtonPrefab;
+    public GameObject ShadowMask;
+
     private List<ElevatorButton> _buttons = new List<ElevatorButton>();
+
+    public bool LightUpButtons
+    {
+        set
+        {
+            ShadowMask.SetActive(!value);
+        }
+    }
 
     public void GenerateElevatorButtons(int floors, Action<int> elevatorButtonClicked)
     {

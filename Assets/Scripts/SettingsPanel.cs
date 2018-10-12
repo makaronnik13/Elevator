@@ -16,7 +16,6 @@ public class SettingsPanel : MonoBehaviour
         StartButton.interactable = false;
         FloorsInput.onValueChanged.AddListener(OnInputChanged);
     }
-
     private void OnInputChanged(string text)
     {
         int r;

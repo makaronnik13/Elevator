@@ -57,7 +57,6 @@ public class FloorPanel : MonoBehaviour
             }
         }
     }
-
     private Image __upButtonImage;
     private Image _upButtonImage
     {
@@ -70,7 +69,6 @@ public class FloorPanel : MonoBehaviour
             return __upButtonImage;
         }
     }
-
     private Image __downButtonImage;
     private Image _downButtonImage
     {
@@ -115,11 +113,9 @@ public class FloorPanel : MonoBehaviour
                 _downPressed = true;
             }
         });
-
         //_downButtonImage.alphaHitTestMinimumThreshold = 0.1f;
         //_upButtonImage.alphaHitTestMinimumThreshold = 0.1f;
     }
-
     public void CreateHuman()
     {
         if (WaitingArea.transform.childCount < 2)
@@ -127,7 +123,6 @@ public class FloorPanel : MonoBehaviour
             GameObject newHuman = Instantiate(HumanPrefab, Vector3.zero, Quaternion.identity, WaitingArea);
         }
     }
-
     public void ResetButton(Direction direction)
     {
         switch (direction)
