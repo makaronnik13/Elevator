@@ -3,22 +3,15 @@ using UnityEngine;
 
 public class Elevator : MonoBehaviour
 {
+    #region publicVariables
     public ElevatorView View;
     public ElevatorBehaviour Behaviour;
     public ElevatorShaftView Shaft;
+    #endregion
 
-	public void Launch (int floors)
-    {
-        View.GenerateElevatorButtons(floors, ElevatorButtonClicked);
-        Shaft.Init(floors, FloorButtonClicked);
-        Behaviour.OnPositonChanged += Shaft.ChangePosition;
-        Behaviour.OnPositonChanged += View.SetFloor;
-        Behaviour.OnStateChanged += FloorStateChanged;
-        Behaviour.OnPeoplesCountChanged += PeoplesCountChanged;
-        Behaviour.OnDoorsStateChanged += Shaft.SetCabinState;
-        Behaviour.Launch(floors);
-	}
+    private Human _draggingHuman;
 
+    #region privateMethods
     private void PeoplesCountChanged(int v)
     {
         View.LightUpButtons = v != 0;
@@ -40,6 +33,7 @@ public class Elevator : MonoBehaviour
             View.ResetButton(floor);
         }
     }
+
     private void FloorButtonClicked(int floor, FloorPanel.Direction direction)
     {
         FloorState state = Behaviour.GetState(floor);
@@ -55,16 +49,54 @@ public class Elevator : MonoBehaviour
         Behaviour.SetState(floor, state);
     }
 
-    public void PlaceHumanInside(Human human)
-    {
-        Behaviour.AddHuman();
-        Shaft.PlaceHumanInside(human.transform);
-    }
-
     private void ElevatorButtonClicked(int floor)
     {
         FloorState state = Behaviour.GetState(floor);
         state.ChoosedInElevator = true;
         Behaviour.SetState(floor, state);
+        Behaviour.Continue();
     }
+    #endregion
+
+    #region publicMethods
+    public void Launch(int floors)
+    {
+        View.GenerateElevatorButtons(floors, ElevatorButtonClicked);
+        Shaft.Init(floors, FloorButtonClicked);
+        Behaviour.OnPositonChanged += Shaft.ChangePosition;
+        Behaviour.OnPositonChanged += View.SetFloor;
+        Behaviour.OnStateChanged += FloorStateChanged;
+        Behaviour.OnPeoplesCountChanged += PeoplesCountChanged;
+        Behaviour.OnDoorsStateChanged += Shaft.SetCabinState;
+        Behaviour.Launch(floors);
+    }
+
+    public void DragHuman(Human human)
+    {
+        _draggingHuman = human;
+    }
+
+    public void Drop(Transform aim)
+    {
+        if (_draggingHuman && Behaviour.DoorOpen && _draggingHuman.DraggingFrom != aim)
+        {
+            bool canDragFromThisFloor = _draggingHuman.DraggingFrom.GetComponent<ElevatorCabin>() || (Behaviour.Floors - _draggingHuman.DraggingFrom.GetComponentInParent<FloorPanel>().transform.GetSiblingIndex() - 1) == Behaviour.CurrentFloor;
+            if (canDragFromThisFloor)
+            {
+                if (aim.GetComponent<ElevatorCabin>())
+                {
+                    Behaviour.AddHuman();
+                    _draggingHuman.Drop(aim);
+                }
+
+                if (aim.GetComponent<WaitingPlace>() && !_draggingHuman.DraggingFrom.GetComponent<WaitingPlace>())
+                {
+                    Behaviour.RemoveHuman();
+                    _draggingHuman.Drop(aim);
+                }
+            }
+            _draggingHuman = null;
+        }
+    }
+    #endregion
 }

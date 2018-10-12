@@ -6,14 +6,21 @@ using UnityEngine.UI;
 
 public class Human : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHandler
 {
-    private bool _inCabin = false;
     public Sprite[] variants;
+
     private RectTransform _dragingFrom;
     private bool _dragging = false;
+    public RectTransform DraggingFrom
+    {
+        get
+        {
+            return _dragingFrom;
+        }
+    }
 
     void Start()
     {
-        GetComponent<Image>().sprite = variants[Random.Range(0,variants.Length)];
+        GetComponent<Image>().sprite = variants[Random.Range(0, variants.Length)];
         GetComponent<Image>().alphaHitTestMinimumThreshold = 0.1f;
     }
 
@@ -23,19 +30,17 @@ public class Human : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHan
         {
             return;
         }
-       
-        transform.position +=  new Vector3(eventData.delta.x, eventData.delta.y,0);
+
+        transform.position += new Vector3(eventData.delta.x, eventData.delta.y, 0);
     }
 
     public void OnBeginDrag(PointerEventData eventData)
     {
-        if (!GetComponentInParent<Elevator>().Behaviour.DoorOpen)
-        {
-            return;
-        }
+        GetComponentInParent<Elevator>().DragHuman(this);
         _dragging = true;
         _dragingFrom = (RectTransform)transform.parent;
         transform.SetParent(GetComponentInParent<Canvas>().transform);
+        GetComponent<Image>().raycastTarget = false;
     }
 
     public void OnEndDrag(PointerEventData eventData)
@@ -45,15 +50,19 @@ public class Human : MonoBehaviour, IDragHandler, IBeginDragHandler, IEndDragHan
             return;
         }
         _dragging = false;
-        float localX = _dragingFrom.InverseTransformPoint(eventData.position).x;
-        if (localX<-((RectTransform)transform).rect.width/2f)
+
+        GetComponent<Image>().raycastTarget = true;
+        transform.SetParent(_dragingFrom);
+    }
+
+    public void Drop(Transform aim)
+    {
+        _dragging = false;
+        GetComponent<Image>().raycastTarget = true;
+        transform.SetParent(aim);
+        if (aim.GetComponent<WaitingPlace>())
         {
-            GetComponentInParent<Elevator>().PlaceHumanInside(this);
-            _inCabin = true;
+            Destroy(gameObject);
         }
-        else
-        {
-            transform.SetParent(_dragingFrom);
-        }       
     }
 }

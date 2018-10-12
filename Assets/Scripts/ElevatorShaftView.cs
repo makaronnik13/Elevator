@@ -38,24 +38,29 @@ public class ElevatorShaftView : MonoBehaviour
         Cabin.SetAsLastSibling();
         Cabin.sizeDelta = _floorSize * Vector2.one;
         ChangePosition(0);
-        FloorsParent.localPosition = Vector2.up*floors*_floorSize;
+        StartCoroutine(MoveToBottom());
     }
+
     public void ChangePosition(float v)
-    {        
-        Cabin.anchoredPosition = new Vector2(Cabin.anchoredPosition.x, _floorSize*(v+0.5f));
+    {
+        Cabin.anchoredPosition = new Vector2(Cabin.anchoredPosition.x, _floorSize * (v + 0.5f));
     }
+
     public void ResetButton(int i, FloorPanel.Direction direction)
     {
         _panels[i].ResetButton(direction);
-    }
-
-    public void PlaceHumanInside(Transform humanTransform)
-    {
-        humanTransform.transform.SetParent(Cabin);
     }
 
     public void SetCabinState(bool v)
     {
         Cabin.GetComponent<Animator>().SetBool("Open", v);
     }
+
+    private IEnumerator MoveToBottom()
+    {
+        yield return null;
+        GetComponentInChildren<ScrollRect>().verticalNormalizedPosition = 0f;
+    }
+
+    
 }

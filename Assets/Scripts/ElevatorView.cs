@@ -40,5 +40,9 @@ public class ElevatorView : MonoBehaviour
     {
         FloorText.text = (Mathf.RoundToInt(position)+1).ToString();
     }
-   
+
+    public void OnStopButtonPressed()
+    {
+        GetComponentInParent<Elevator>().Behaviour.Pause();
+    }
 }
